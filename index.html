@@ -1,0 +1,67 @@
+<html>
+<head>
+   <title>Hello, World! example for mxGraph</title>
+
+   <script type="text/javascript">
+      mxBasePath = 'node_modules/mxgraph/javascript/src';
+   </script>
+
+   <script type="text/javascript" src="node_modules/mxgraph/javascript/src/js/mxClient.js"></script>
+
+   <script type="text/javascript">
+      function main(container)
+      {
+         if (!mxClient.isBrowserSupported())
+         {
+            mxUtils.error('Browser is not supported!', 200, false);
+            return;
+         }
+
+        // Creates the graph inside the given container
+        const graph = new mxGraph(container);
+
+        // Enables rubberband selection
+        new mxRubberband(graph);
+
+        // Gets the default parent for inserting new cells. This
+        // is normally the first child of the root (ie. layer 0).
+        const parent = graph.getDefaultParent();
+
+        // Adds cells to the model in a single step
+        graph.getModel().beginUpdate();
+        try
+        {
+            const v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
+            const foo = graph.insertVertex(v1, null, 'Foo', 10, 10, 40, 15);
+            const v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
+            const e1 = graph.insertEdge(parent, null, '', v1, v2);
+
+            graph.addListener(mxEvent.CLICK, (sender, evt) => {
+                console.log(evt);
+            const cell = evt.getProperty("cell");
+            if (!!cell && cell.value === 'Foo') {
+                console.log(foo);
+                debugger;
+                graph.setCellStyle(`${mxConstants.STYLE_FILLCOLOR}:yellow`, [foo]);
+                //SelectGraphCell(cell);
+                //graph.setSelectionCell(cell);
+                //cell.style = 'background-color:yellow';
+            }
+            evt.consume();
+            });
+        }
+        finally
+        {
+            // Updates the display
+            graph.getModel().endUpdate();
+        }
+      };
+   </script>
+</head>
+
+<body onload="main(document.getElementById('graphContainer'))">
+   <div id="graphContainer"
+      style="overflow:hidden;width:321px;height:241px;background-color:beige">
+   </div>
+</body>
+</html>
