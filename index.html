@@ -9,6 +9,86 @@
     <script type="text/javascript" src="node_modules/mxgraph/javascript/src/js/mxClient.js"></script>
 
     <script type="text/javascript">
+      const data = {
+        areas: [
+          {
+            name: 'Area A',
+            steps: [
+              {
+                name: 'Step A1',
+                externalLinks: [
+                  {
+                    url: 'https://www.google.com'
+                  },
+                  {
+                    url: 'https://portal.office.com'
+                  }
+                ]
+              },
+              {
+                name: 'Step A2',
+                linkTo: {
+                  area: 'Area B',
+                  step: 'Step B1'
+                }
+              },
+              {
+                name: 'Step A3'
+              }
+            ]
+          },
+          {
+            name: 'Area B',
+            steps: [
+              {
+                name: 'Step B1',
+                linkTo: {
+                  area: 'Area C',
+                  step: 'Step C2'
+                },
+                externalLinks: [
+                  {
+                    url: 'https://portal.azure.com'
+                  }
+                ]
+              },
+              {
+                name: 'Step B2'
+              },
+              {
+                name: 'Step B3'
+              },
+              {
+                name: 'Step B4'
+              }
+            ]
+          },
+          {
+            name: 'Area C',
+            steps: [
+              {
+                name: 'Step C1'
+              },
+              {
+                name: 'Step C2'
+              }
+            ]
+          }
+        ]
+      };
+      
+      const graphLayout = {
+        areaWidth: 100,
+        areaHeight: 200,
+        areaMarginHorizontal: 10,
+        areaMarginVertical: 10,
+        stepWidth: 80,
+        stepHeight: 20,
+        stepMarginHorizontal: 10,
+        stepInitialVerticalMargin: 50,
+        stepMarginVertical: 10
+      };
+
       function main(container) {
         if (!mxClient.isBrowserSupported()) {
           mxUtils.error('Browser is not supported!', 200, false);
@@ -28,23 +108,51 @@
         // Adds cells to the model in a single step
         graph.getModel().beginUpdate();
         try {
-          const v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 100);
-          const foo = graph.insertVertex(v1, null, 'Foo', 10, 10, 40, 15);
-          const v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 100);
-          const bar = graph.insertVertex(v2, null, 'Bar', 10, 10, 40, 15);
-          const e1 = graph.insertEdge(parent, null, '', v1, v2);
-          const e2 = graph.insertEdge(parent, null, '', foo, bar);
+          let areaCounter = 1;
+          for (const area of data.areas) {
+            const areaVertex = graph.insertVertex(
+              parent,
+              null,
+              area.name,
+              (areaCounter-1) * (graphLayout.areaWidth + graphLayout.areaMarginHorizontal) + graphLayout.areaMarginHorizontal,
+              graphLayout.areaMarginVertical,
+              graphLayout.areaWidth,
+              graphLayout.areaHeight,
+              `${mxConstants.STYLE_VERTICAL_LABEL_POSITION}=${mxConstants.ALIGN_TOP};${mxConstants.STYLE_VERTICAL_ALIGN}=${mxConstants.ALIGN_BOTTOM}`);
+              let stepCounter = 1;
+              for (const step of area.steps) {
+                graph.insertVertex(
+                  areaVertex,
+                  null,
+                  step.name,
+                  graphLayout.stepMarginHorizontal,
+                  stepCounter === 1 ? graphLayout.stepInitialVerticalMargin :
+                    (stepCounter-1) * (graphLayout.stepHeight + graphLayout.stepMarginVertical) + graphLayout.stepMarginVertical + graphLayout.stepInitialVerticalMargin,
+                  graphLayout.stepWidth,
+                  graphLayout.stepHeight
+                );
+                stepCounter++;
+              }
 
-          graph.addListener(mxEvent.CLICK, (sender, evt) => {
-            const cell = evt.getProperty('cell');
-            if (!!cell && cell.value === 'Foo') {
-              graph.setCellStyle(`defaultVertex;${mxConstants.STYLE_FILLCOLOR}=#ff0000`, [cell]);
-              // debugger;
-              //graph.setCellStyle(`defaultEdge;${mxConstants.STYLE_STROKE_OPACITY}=0`, [e2]);
-              graph.removeCells([e2]);
-            }
-            evt.consume();
-          });
+              areaCounter++;
+          }
+          // const v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 100);
+          // const foo = graph.insertVertex(v1, null, 'Foo', 10, 10, 40, 15);
+          // const v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 100);
+          // const bar = graph.insertVertex(v2, null, 'Bar', 10, 10, 40, 15);
+          // const e1 = graph.insertEdge(parent, null, '', v1, v2);
+          // const e2 = graph.insertEdge(parent, null, '', foo, bar);
+
+          // graph.addListener(mxEvent.CLICK, (sender, evt) => {
+          //   const cell = evt.getProperty('cell');
+          //   if (!!cell && cell.value === 'Foo') {
+          //     graph.setCellStyle(`defaultVertex;${mxConstants.STYLE_FILLCOLOR}=#ff0000`, [cell]);
+          //     // debugger;
+          //     //graph.setCellStyle(`defaultEdge;${mxConstants.STYLE_STROKE_OPACITY}=0`, [e2]);
+          //     graph.removeCells([e2]);
+          //   }
+          //   evt.consume();
+          // });
         } finally {
           // Updates the display
           graph.getModel().endUpdate();
